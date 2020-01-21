@@ -20,10 +20,10 @@ defmodule DemoWeb.UrLive do
   end
 
   def handle_event("roll", _, socket) do
-    {:noreply, assign(socket, val: roll())}
+    {:noreply, update(socket, :val, &roll/1)}
   end
 
-  defp roll do
+  defp roll(_) do
     Enum.sum([Enum.random(0..1), Enum.random(0..1), Enum.random(0..1), Enum.random(0..1)])
   end
 end
