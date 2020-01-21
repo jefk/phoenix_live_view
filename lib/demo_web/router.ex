@@ -24,6 +24,7 @@ defmodule DemoWeb.Router do
 
     get "/", PageController, :index
 
+    live "/ur", UrLive
     live "/thermostat", ThermostatLive
     get "/snake", PageController, :snake
     live "/search", SearchLive
