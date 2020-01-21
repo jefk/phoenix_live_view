@@ -16,7 +16,7 @@ defmodule DemoWeb.UrLive do
   end
 
   def mount(_session, socket) do
-    {:ok, assign(socket, val: false)}
+    {:ok, assign(socket, val: nil)}
   end
 
   def handle_event("roll", _, socket) do
