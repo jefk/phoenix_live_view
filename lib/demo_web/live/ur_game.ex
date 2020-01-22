@@ -57,7 +57,8 @@ defmodule DemoWeb.UrGame do
   defp blocked_by_opponent(state, index) do
     opponent_positions = Map.get(state, opponent(state))
 
-    special_position?(index) && Enum.member?(opponent_positions, index)
+    special_position?(index) && Enum.member?(opponent_positions, index) &&
+      Enum.member?(@battle_ground, index)
   end
 
   defp switch_player(state) do

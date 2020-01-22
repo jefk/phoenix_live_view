@@ -25,8 +25,8 @@ defmodule DemoWeb.UrPresenter do
 
     shared_cells =
       Enum.map(5..12, fn index ->
-        alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "a", else: nil
-        bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "b", else: nil
+        alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "🤷‍♀️", else: nil
+        bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "🤷‍♂️", else: nil
         possible? = Enum.member?(possible_moves, index)
 
         class_names =
@@ -55,9 +55,15 @@ defmodule DemoWeb.UrPresenter do
     possible_moves = UrGame.possible_moves(state)
     prefix = player |> Atom.to_string() |> String.first()
 
+    emoji =
+      case player do
+        :alice -> "🤷‍♀️"
+        _ -> "🤷‍♂️"
+      end
+
     Enum.concat(1..4, 13..14)
     |> Enum.map(fn index ->
-      player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: prefix, else: nil
+      player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: emoji, else: nil
       possible? = Enum.member?(possible_moves, index) && state.current_player == player
 
       class_names =
