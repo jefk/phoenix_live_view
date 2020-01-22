@@ -59,7 +59,7 @@
 }
 
 .cell .token {
-  font-size: 3.5rem;
+  font-size: 4rem;
 }
 
 .cell .label {
@@ -79,6 +79,10 @@
 
 .possible:hover {
   border: 2px solid rgb(108,255,71);
+}
+
+.roll-btn {
+  min-width: 130px;
 }
 
 @keyframes pulse {
@@ -109,9 +113,9 @@
 
     <div style="flex-shrink: 0; margin-left: auto">
       <%= if !@current_roll do %>
-        <%= content_tag(:button, "Roll", class: "btn", disabled: !@my_turn || !@bob_socket, "phx-click": "roll") %>
+        <%= content_tag(:button, "🎲 Roll", class: "btn roll-btn", disabled: !@my_turn || !@bob_socket, "phx-click": "roll") %>
       <% else %>
-        <button class="btn" disabled>A <%= @current_roll %> was rolled</button>
+        <button class="btn roll-btn" disabled>🎲 <%= @current_roll %></button>
       <% end %>
     </div>
   </div>
