@@ -7,19 +7,25 @@ defmodule DemoWeb.UrLive do
   @roll_event "event:roll"
   @initial_state %{
     current_roll: nil,
+    alice_socket: nil,
+    bob_socket: nil,
     alice: Enum.map(1..14, fn _ -> false end),
     bob: Enum.map(1..14, fn _ -> false end)
   }
 
-  def render(%{state: state}) do
-    template_assigns = state |> Map.merge(%{cells: get_cells(state)})
+  def render(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
+    template_assigns =
+      state |> Map.merge(%{cells: get_cells(state), socket_id: id, other_sockets: other_sockets})
+
     UrView.render("index.html", template_assigns)
   end
 
   def mount(_session, socket) do
+    DemoWeb.Endpoint.broadcast_from(self(), @topic, "event:join", %{socket_id: socket.id})
+
     DemoWeb.Endpoint.subscribe(@topic)
 
-    {:ok, assign(socket, %{state: @initial_state})}
+    {:ok, assign(socket, %{state: @initial_state, other_sockets: []})}
   end
 
   def handle_event("roll", _, %{assigns: %{state: state}} = socket) do
@@ -32,8 +38,17 @@ defmodule DemoWeb.UrLive do
     {:noreply, assign(socket, :state, move_update(state))}
   end
 
+  def handle_event("play-as-alice", _, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(%{event: @roll_event, payload: payload}, socket) do
     {:noreply, assign(socket, payload)}
+  end
+
+  def handle_info(%{event: "event:join", payload: %{socket_id: socket_id}}, socket) do
+    other_sockets = (socket.assigns.other_sockets ++ [socket_id]) |> Enum.uniq()
+    {:noreply, assign(socket, :other_sockets, other_sockets)}
   end
 
   defp roll() do

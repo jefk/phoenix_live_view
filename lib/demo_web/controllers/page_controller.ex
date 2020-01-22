@@ -10,4 +10,10 @@ defmodule DemoWeb.PageController do
     |> put_layout(:game)
     |> live_render(DemoWeb.SnakeLive, session: %{})
   end
+
+  def ur(conn, _) do
+    conn
+    |> put_layout(:game)
+    |> live_render(DemoWeb.UrLive, session: %{})
+  end
 end
