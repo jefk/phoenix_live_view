@@ -2,13 +2,20 @@ defmodule DemoWeb.UrPresenter do
   # This is probably what a view is for??
 
   def present(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
+    my_turn? = get_my_turn(state, id)
+
+    cells =
+      state
+      |> get_cells
+      |> maybe_no_op_clicks(my_turn?)
+
     state
     |> Map.merge(%{
-      cells: get_cells(state),
+      cells: cells,
       socket_id: id,
       other_sockets: other_sockets,
       player_message: get_message(state, id),
-      my_turn: get_my_turn(state, id)
+      my_turn: my_turn?
     })
   end
 
@@ -21,7 +28,7 @@ defmodule DemoWeb.UrPresenter do
         bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "b", else: nil
         possible? = Enum.member?(possible_moves, index)
         class_names = if possible?, do: "possible", else: ""
-        phx_click = if possible?, do: "move", else: "no-op"
+        phx_click = if possible?, do: "move", else: ""
 
         %{
           name: "s#{index}",
@@ -47,7 +54,7 @@ defmodule DemoWeb.UrPresenter do
       possible? = Enum.member?(possible_moves, index) && state.current_player == player
 
       class_names = if possible?, do: "possible", else: ""
-      phx_click = if possible?, do: "move", else: "no-op"
+      phx_click = if possible?, do: "move", else: ""
 
       %{
         name: "#{prefix}#{index}",
@@ -90,5 +97,14 @@ defmodule DemoWeb.UrPresenter do
     current_positions
     |> Enum.map(fn index -> index + state.current_roll end)
     |> Enum.uniq()
+  end
+
+  defp maybe_no_op_clicks(cells, my_turn?) do
+    if my_turn? do
+      cells
+    else
+      cells
+      |> Enum.map(fn cell -> Map.put(cell, :phx_click, "") end)
+    end
   end
 end

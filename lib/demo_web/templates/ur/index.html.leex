@@ -1,7 +1,7 @@
 <style type="text/css">
 .board {
   display: grid;
-  grid-gap: 0.5rem;
+  grid-gap: 1rem;
   grid-template-areas: "a4  s5  b4"
                        "a3  s6  b3"
                        "a2  s7  b2"
@@ -13,13 +13,24 @@
 }
 
 .cell {
-  background: tomato;
+  border: 2px solid tomato;
   padding: 1rem;
 }
 
 .possible {
-  color: white;
-  background: rebeccapurple;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: rgba(255,99,71, 0.2);
+  }
+  50% {
+    background-color: rgba(255,99,71, 0.3);
+  }
+  100% {
+    background-color: rgba(255,99,71, 0.2);
+  }
 }
 </style>
 <div>
@@ -29,7 +40,9 @@
 
   <%=if @bob_socket do %>
 
-    <%= if !@my_turn do %>
+    <%= if @my_turn do %>
+      <div>It's your turn</div>
+    <% else %>
       <div>Waiting for <%= @current_player %> to move</div>
     <% end %>
 
@@ -37,7 +50,7 @@
       <%= if !@current_roll do %>
         <%= content_tag(:button, "Roll", disabled: !@my_turn, "phx-click": "roll") %>
       <% else %>
-        A <%= @current_roll %> was rolled.
+        <button disabled>A <%= @current_roll %> was rolled</button>
       <% end %>
     </div>
 
@@ -63,4 +76,7 @@
       </div>
     <% end %>
   </div>
+
+  <div><%= Enum.join(@alice, " | ") %></div>
+  <div><%= Enum.join(@bob, " | ") %></div>
 </div>
