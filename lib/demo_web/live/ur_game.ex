@@ -15,7 +15,7 @@ defmodule DemoWeb.UrGame do
 
     current_positions
     |> Enum.map(fn index -> index + state.current_roll end)
-    |> Enum.reject(fn index -> Enum.member?(current_positions, index) end)
+    |> Enum.reject(fn index -> index < 15 && Enum.member?(current_positions, index) end)
     |> Enum.reject(fn index -> blocked_by_opponent(state, index) end)
     |> Enum.uniq()
   end
