@@ -9,8 +9,8 @@ defmodule DemoWeb.UrLive do
     current_roll: nil,
     alice_socket: nil,
     bob_socket: nil,
-    alice: Enum.map(1..14, fn _ -> false end),
-    bob: Enum.map(1..14, fn _ -> false end)
+    alice: 0,
+    bob: 0
   }
 
   def render(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
@@ -76,19 +76,14 @@ defmodule DemoWeb.UrLive do
   end
 
   defp move_update(state) do
-    current_position = state.alice |> Enum.find_index(fn x -> x end) || 0
-
-    alice =
-      state.alice
-      |> List.update_at(current_position, fn _ -> false end)
-      |> List.update_at(current_position + state.current_roll, fn _ -> true end)
+    alice = state.alice + state.current_roll
 
     state |> Map.merge(%{alice: alice, current_roll: nil})
   end
 
   defp occupier(%{alice: alice}, index) do
-    case Enum.at(alice, index) do
-      true -> "a"
+    case index do
+      x when x == alice -> "a"
       _ -> ""
     end
   end
