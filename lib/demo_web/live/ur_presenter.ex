@@ -96,6 +96,7 @@ defmodule DemoWeb.UrPresenter do
 
     current_positions
     |> Enum.map(fn index -> index + state.current_roll end)
+    |> Enum.filter(fn index -> !Enum.member?(current_positions, index) end)
     |> Enum.uniq()
   end
 
