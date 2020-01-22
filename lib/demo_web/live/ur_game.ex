@@ -1,5 +1,6 @@
 defmodule DemoWeb.UrGame do
   @special_positions [4, 8, 14]
+  @battle_ground 5..12
 
   def special_position?(index) do
     @special_positions |> Enum.member?(index)
@@ -43,6 +44,7 @@ defmodule DemoWeb.UrGame do
     state =
       state
       |> Map.put(state.current_player, new_player_positions)
+      |> maybe_bump_opponent
       |> Map.put(:current_roll, nil)
 
     if special_position?(move_to), do: state, else: switch_player(state)
@@ -68,5 +70,25 @@ defmodule DemoWeb.UrGame do
       :alice -> :bob
       _ -> :alice
     end
+  end
+
+  defp maybe_bump_opponent(state) do
+    player_positions = Map.get(state, state.current_player)
+    opponent_positions = Map.get(state, opponent(state))
+
+    bump_index =
+      opponent_positions
+      |> Enum.find_index(fn position ->
+        Enum.member?(@battle_ground, position) && Enum.member?(player_positions, position)
+      end)
+
+    if bump_index, do: bump_at(state, bump_index), else: state
+  end
+
+  defp bump_at(state, index) do
+    opponent_positions = Map.get(state, opponent(state)) |> List.replace_at(index, 0)
+
+    state
+    |> Map.put(opponent(state), opponent_positions)
   end
 end
