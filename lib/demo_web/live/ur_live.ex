@@ -4,6 +4,8 @@ defmodule DemoWeb.UrLive do
   alias DemoWeb.UrView
   alias DemoWeb.UrPresenter
 
+  @special_positions [4, 8, 14]
+
   @topic "ur"
   @initial_state %{
     current_roll: nil,
@@ -51,6 +53,10 @@ defmodule DemoWeb.UrLive do
   def handle_info(%{event: "event:join", payload: %{socket_id: socket_id}}, socket) do
     other_sockets = (socket.assigns.other_sockets ++ [socket_id]) |> Enum.uniq()
     {:noreply, assign(socket, :other_sockets, other_sockets)}
+  end
+
+  def special_position?(index) do
+    @special_positions |> Enum.member?(index)
   end
 
   defp roll() do

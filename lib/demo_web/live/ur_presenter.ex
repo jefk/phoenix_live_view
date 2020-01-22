@@ -27,7 +27,13 @@ defmodule DemoWeb.UrPresenter do
         alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "a", else: nil
         bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "b", else: nil
         possible? = Enum.member?(possible_moves, index)
-        class_names = if possible?, do: "possible", else: ""
+
+        class_names =
+          []
+          |> Enum.concat(if possible?, do: ["possible"], else: [])
+          |> Enum.concat(if DemoWeb.UrLive.special_position?(index), do: ["special"], else: [])
+          |> Enum.join(" ")
+
         phx_click = if possible?, do: "move", else: ""
 
         %{
@@ -53,7 +59,12 @@ defmodule DemoWeb.UrPresenter do
       player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: prefix, else: nil
       possible? = Enum.member?(possible_moves, index) && state.current_player == player
 
-      class_names = if possible?, do: "possible", else: ""
+      class_names =
+        []
+        |> Enum.concat(if possible?, do: ["possible"], else: [])
+        |> Enum.concat(if DemoWeb.UrLive.special_position?(index), do: ["special"], else: [])
+        |> Enum.join(" ")
+
       phx_click = if possible?, do: "move", else: ""
 
       %{
