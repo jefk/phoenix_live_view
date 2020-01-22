@@ -2,6 +2,7 @@ defmodule DemoWeb.UrLive do
   use Phoenix.LiveView
 
   alias DemoWeb.UrView
+  alias DemoWeb.UrPresenter
 
   @topic "ur"
   @initial_state %{
@@ -12,17 +13,8 @@ defmodule DemoWeb.UrLive do
     bob: 0
   }
 
-  def render(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
-    template_assigns =
-      state
-      |> Map.merge(%{
-        cells: get_cells(state),
-        socket_id: id,
-        other_sockets: other_sockets,
-        player_message: get_message(state, id)
-      })
-
-    UrView.render("index.html", template_assigns)
+  def render(assigns) do
+    UrView.render("index.html", UrPresenter.present(assigns))
   end
 
   def mount(_session, socket) do
@@ -65,21 +57,6 @@ defmodule DemoWeb.UrLive do
     Enum.sum([Enum.random(0..1), Enum.random(0..1), Enum.random(0..1), Enum.random(0..1)])
   end
 
-  defp get_cells(state) do
-    1..14
-    |> Enum.flat_map(fn index ->
-      occupied = occupier(state, index)
-
-      case index do
-        x when x in 5..12 ->
-          [%{name: "s#{index}", occupied: occupied}]
-
-        _ ->
-          [%{name: "a#{index}", occupied: occupied}, %{name: "b#{index}", occupied: ""}]
-      end
-    end)
-  end
-
   defp roll_update(state) do
     state
     |> Map.merge(%{current_roll: roll()})
@@ -91,24 +68,8 @@ defmodule DemoWeb.UrLive do
     state |> Map.merge(%{alice: alice, current_roll: nil})
   end
 
-  defp occupier(%{alice: alice}, index) do
-    case index do
-      x when x == alice -> "a"
-      _ -> ""
-    end
-  end
-
   defp broadcast_and_assign_state(state, socket) do
     DemoWeb.Endpoint.broadcast_from(self(), @topic, "update:state", state)
     {:noreply, assign(socket, :state, state)}
-  end
-
-  defp get_message(%{alice_socket: alice_socket, bob_socket: bob_socket}, id) do
-    case {id, alice_socket, bob_socket} do
-      {x, x, _} -> "You are playing as Alice"
-      {x, _, x} -> "You are playing as Bob"
-      {_, _, nil} -> "Waiting for Bob"
-      _ -> "You are #{id}, watching Alice (#{alice_socket}) vs Bob (#{bob_socket})"
-    end
   end
 end
