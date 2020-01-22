@@ -13,18 +13,35 @@ defmodule DemoWeb.UrPresenter do
   end
 
   defp get_cells(state) do
-    1..14
-    |> Enum.flat_map(fn index ->
-      alice_in = if state.alice == index, do: "a", else: nil
-      bob_in = if state.bob == index, do: "b", else: nil
+    possible_moves = get_possible_moves(state)
 
-      case index do
-        x when x in 5..12 ->
-          [%{name: "s#{index}", occupied: alice_in || bob_in}]
+    shared_cells =
+      Enum.map(5..12, fn index ->
+        alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "a", else: nil
+        bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "b", else: nil
+        class_names = if Enum.member?(possible_moves, index), do: "possible", else: ""
+        %{name: "s#{index}", occupied: alice_in || bob_in, class_names: class_names}
+      end)
 
-        _ ->
-          [%{name: "a#{index}", occupied: alice_in}, %{name: "b#{index}", occupied: bob_in}]
-      end
+    shared_cells
+    |> Enum.concat(get_cells(state, :alice))
+    |> Enum.concat(get_cells(state, :bob))
+  end
+
+  defp get_cells(state, player) do
+    possible_moves = get_possible_moves(state)
+    prefix = player |> Atom.to_string() |> String.first()
+
+    Enum.concat(1..4, 13..14)
+    |> Enum.map(fn index ->
+      player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: prefix, else: nil
+
+      class_names =
+        if Enum.member?(possible_moves, index) && state.current_player == player,
+          do: "possible",
+          else: ""
+
+      %{name: "#{prefix}#{index}", occupied: player_in_cell, class_names: class_names}
     end)
   end
 
@@ -47,5 +64,17 @@ defmodule DemoWeb.UrPresenter do
       {x, _, x} -> :bob
       _ -> nil
     end
+  end
+
+  defp get_possible_moves(state) do
+    current_positions =
+      case state.current_roll do
+        nil -> []
+        _ -> Map.get(state, state.current_player)
+      end
+
+    current_positions
+    |> Enum.map(fn index -> index + state.current_roll end)
+    |> Enum.uniq()
   end
 end

@@ -16,6 +16,11 @@
   background: tomato;
   padding: 1rem;
 }
+
+.possible {
+  color: white;
+  background: rebeccapurple;
+}
 </style>
 <div>
   <h1>The Royal Game of Ur</h1>
@@ -47,8 +52,8 @@
   <% end %>
 
   <div class="board">
-    <%= for %{name: name, occupied: occupied} <- @cells do %>
-      <div class="cell <%= name %>" style="grid-area: <%= name %>"><%= name %> <%= occupied %></div>
+    <%= for %{name: name, occupied: occupied, class_names: class_names} <- @cells do %>
+      <div class="cell <%= name %> <%= class_names %>" style="grid-area: <%= name %>"><%= name %> <%= occupied %></div>
     <% end %>
   </div>
 </div>

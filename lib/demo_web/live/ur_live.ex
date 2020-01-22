@@ -10,8 +10,8 @@ defmodule DemoWeb.UrLive do
     alice_socket: nil,
     bob_socket: nil,
     current_player: :alice,
-    alice: 0,
-    bob: 0
+    alice: Enum.map(1..7, fn _ -> 0 end),
+    bob: Enum.map(1..7, fn _ -> 0 end)
   }
 
   def render(assigns) do
