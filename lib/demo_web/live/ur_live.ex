@@ -1,22 +1,12 @@
 defmodule DemoWeb.UrLive do
   use Phoenix.LiveView
 
+  alias DemoWeb.UrView
+
   @topic "ur"
   @roll_event "event:roll"
 
-  def render(assigns) do
-    ~L"""
-    <div>
-      <h1>The Royal Game of Ur</h1>
-      <%= if @val do %>
-      <span><%= @val %></span>
-      <% end %>
-      <div>
-      <button phx-click="roll">Roll</button>
-      </div>
-    </div>
-    """
-  end
+  def render(assigns), do: UrView.render("index.html", assigns)
 
   def mount(_session, socket) do
     DemoWeb.Endpoint.subscribe(@topic)
