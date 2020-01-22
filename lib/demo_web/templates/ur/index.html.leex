@@ -19,14 +19,13 @@
 </style>
 <div>
   <h1>The Royal Game of Ur</h1>
-  <div>Alice <%= Enum.join(@alice, " ") %></div>
   <div>
-  <%= if !@current_roll do %>
-  <button phx-click="roll">Roll</button>
-  <% end %>
-  <%= if @current_roll do %>
-  <button phx-click="move">Move <%= @current_roll %></button>
-  <% end %>
+    <%= if !@current_roll do %>
+      <button phx-click="roll">Roll</button>
+    <% end %>
+    <%= if @current_roll do %>
+      <button phx-click="move">Move <%= @current_roll %></button>
+    <% end %>
   </div>
   <div class="board">
     <%= for %{name: name, occupied: occupied} <- @cells do %>

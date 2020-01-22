@@ -28,28 +28,29 @@ defmodule DemoWeb.UrLive do
     {:noreply, assign(socket, %{state: state})}
   end
 
-  def handle_event("move", _, socket) do
-    {:noreply, socket}
+  def handle_event("move", _, %{assigns: %{state: state}} = socket) do
+    {:noreply, assign(socket, :state, move_update(state))}
   end
 
-  def handle_info(%{event: @roll_event, payload: state}, socket) do
-    IO.inspect('handle')
-    {:noreply, assign(socket, state)}
+  def handle_info(%{event: @roll_event, payload: payload}, socket) do
+    {:noreply, assign(socket, payload)}
   end
 
   defp roll() do
     Enum.sum([Enum.random(0..1), Enum.random(0..1), Enum.random(0..1), Enum.random(0..1)])
   end
 
-  defp get_cells(_state) do
+  defp get_cells(state) do
     1..14
     |> Enum.flat_map(fn index ->
+      occupied = occupier(state, index)
+
       case index do
         x when x in 5..12 ->
-          [%{name: "s#{index}", occupied: ""}]
+          [%{name: "s#{index}", occupied: occupied}]
 
         _ ->
-          [%{name: "a#{index}", occupied: ""}, %{name: "b#{index}", occupied: ""}]
+          [%{name: "a#{index}", occupied: occupied}, %{name: "b#{index}", occupied: ""}]
       end
     end)
   end
@@ -57,5 +58,23 @@ defmodule DemoWeb.UrLive do
   defp roll_update(state) do
     state
     |> Map.merge(%{current_roll: roll()})
+  end
+
+  defp move_update(state) do
+    current_position = state.alice |> Enum.find_index(fn x -> x end) || 0
+
+    alice =
+      state.alice
+      |> List.update_at(current_position, fn _ -> false end)
+      |> List.update_at(current_position + state.current_roll, fn _ -> true end)
+
+    state |> Map.merge(%{alice: alice, current_roll: nil})
+  end
+
+  defp occupier(%{alice: alice}, index) do
+    case Enum.at(alice, index) do
+      true -> "a"
+      _ -> ""
+    end
   end
 end
