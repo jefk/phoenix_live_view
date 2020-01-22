@@ -19,8 +19,17 @@ defmodule DemoWeb.UrPresenter do
       Enum.map(5..12, fn index ->
         alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "a", else: nil
         bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "b", else: nil
-        class_names = if Enum.member?(possible_moves, index), do: "possible", else: ""
-        %{name: "s#{index}", occupied: alice_in || bob_in, class_names: class_names}
+        possible? = Enum.member?(possible_moves, index)
+        class_names = if possible?, do: "possible", else: ""
+        phx_click = if possible?, do: "move", else: "no-op"
+
+        %{
+          name: "s#{index}",
+          occupied: alice_in || bob_in,
+          class_names: class_names,
+          phx_click: phx_click,
+          index: index
+        }
       end)
 
     shared_cells
@@ -35,13 +44,18 @@ defmodule DemoWeb.UrPresenter do
     Enum.concat(1..4, 13..14)
     |> Enum.map(fn index ->
       player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: prefix, else: nil
+      possible? = Enum.member?(possible_moves, index) && state.current_player == player
 
-      class_names =
-        if Enum.member?(possible_moves, index) && state.current_player == player,
-          do: "possible",
-          else: ""
+      class_names = if possible?, do: "possible", else: ""
+      phx_click = if possible?, do: "move", else: "no-op"
 
-      %{name: "#{prefix}#{index}", occupied: player_in_cell, class_names: class_names}
+      %{
+        name: "#{prefix}#{index}",
+        occupied: player_in_cell,
+        class_names: class_names,
+        phx_click: phx_click,
+        index: index
+      }
     end)
   end
 

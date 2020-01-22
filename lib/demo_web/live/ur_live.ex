@@ -32,9 +32,9 @@ defmodule DemoWeb.UrLive do
     |> broadcast_and_assign_state(socket)
   end
 
-  def handle_event("move", _, socket) do
+  def handle_event("move", %{"moveto" => move_to}, socket) do
     socket.assigns.state
-    |> move_update
+    |> move_update(String.to_integer(move_to))
     |> broadcast_and_assign_state(socket)
   end
 
@@ -62,18 +62,23 @@ defmodule DemoWeb.UrLive do
     |> Map.merge(%{current_roll: roll()})
   end
 
-  defp move_update(%{current_player: player} = state) do
-    new_position = Map.get(state, player) + state.current_roll
+  defp move_update(state, move_to) do
+    player = Map.get(state, state.current_player)
 
-    new_player =
-      case player do
+    moved_index =
+      player |> Enum.find_index(fn position -> position == move_to - state.current_roll end)
+
+    new_player = List.replace_at(player, moved_index, move_to)
+
+    new_current_player =
+      case state.current_player do
         :alice -> :bob
         _ -> :alice
       end
 
     state
-    |> Map.put(player, new_position)
-    |> Map.merge(%{current_roll: nil, current_player: new_player})
+    |> Map.put(state.current_player, new_player)
+    |> Map.merge(%{current_roll: nil, current_player: new_current_player})
   end
 
   defp broadcast_and_assign_state(state, socket) do
