@@ -23,23 +23,29 @@
   <div><%= @player_message %></div>
 
   <%=if @bob_socket do %>
-    <div>It's <%= Atom.to_string(@current_player) %>'s turn.</div>
+
+    <%= if !@my_turn do %>
+      <div>Waiting for <%= @current_player %> to move</div>
+    <% end %>
+
+    <div>
+      <%= if !@current_roll do %>
+        <%= content_tag(:button, "Roll", disabled: !@my_turn, "phx-click": "roll") %>
+      <% else %>
+        <%= content_tag(:button, "Move #{@current_roll}", disabled: !@my_turn, "phx-click": "move") %>
+      <% end %>
+    </div>
+
   <% else %>
+
     <div>
       <%= for socket_id <- @other_sockets do %>
         <button phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
       <% end %>
     </div>
+
   <% end %>
 
-  <div>
-    <%= if !@current_roll do %>
-      <button phx-click="roll">Roll</button>
-    <% end %>
-    <%= if @current_roll do %>
-      <button phx-click="move">Move <%= @current_roll %></button>
-    <% end %>
-  </div>
   <div class="board">
     <%= for %{name: name, occupied: occupied} <- @cells do %>
       <div class="cell <%= name %>" style="grid-area: <%= name %>"><%= name %> <%= occupied %></div>
