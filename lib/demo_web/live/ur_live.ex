@@ -4,7 +4,6 @@ defmodule DemoWeb.UrLive do
   alias DemoWeb.UrView
 
   @topic "ur"
-  @roll_event "event:roll"
   @initial_state %{
     current_roll: nil,
     alice_socket: nil,
@@ -15,7 +14,13 @@ defmodule DemoWeb.UrLive do
 
   def render(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
     template_assigns =
-      state |> Map.merge(%{cells: get_cells(state), socket_id: id, other_sockets: other_sockets})
+      state
+      |> Map.merge(%{
+        cells: get_cells(state),
+        socket_id: id,
+        other_sockets: other_sockets,
+        player_message: get_message(state, id)
+      })
 
     UrView.render("index.html", template_assigns)
   end
@@ -28,22 +33,27 @@ defmodule DemoWeb.UrLive do
     {:ok, assign(socket, %{state: @initial_state, other_sockets: []})}
   end
 
-  def handle_event("roll", _, %{assigns: %{state: state}} = socket) do
-    state = state |> roll_update
-    DemoWeb.Endpoint.broadcast_from(self(), @topic, @roll_event, state)
-    {:noreply, assign(socket, %{state: state})}
+  def handle_event("roll", _, socket) do
+    socket.assigns.state
+    |> roll_update
+    |> broadcast_and_assign_state(socket)
   end
 
-  def handle_event("move", _, %{assigns: %{state: state}} = socket) do
-    {:noreply, assign(socket, :state, move_update(state))}
+  def handle_event("move", _, socket) do
+    socket.assigns.state
+    |> move_update
+    |> broadcast_and_assign_state(socket)
   end
 
-  def handle_event("play-as-alice", _, socket) do
-    {:noreply, socket}
+  def handle_event("select-bob", %{"bob" => bob_socket}, socket) do
+    socket.assigns.state
+    |> Map.merge(%{alice_socket: socket.id, bob_socket: bob_socket})
+    |> broadcast_and_assign_state(socket)
   end
 
-  def handle_info(%{event: @roll_event, payload: payload}, socket) do
-    {:noreply, assign(socket, payload)}
+  def handle_info(%{event: "update:state", payload: state}, socket) do
+    IO.puts("handling update:state")
+    {:noreply, assign(socket, :state, state)}
   end
 
   def handle_info(%{event: "event:join", payload: %{socket_id: socket_id}}, socket) do
@@ -85,6 +95,20 @@ defmodule DemoWeb.UrLive do
     case index do
       x when x == alice -> "a"
       _ -> ""
+    end
+  end
+
+  defp broadcast_and_assign_state(state, socket) do
+    DemoWeb.Endpoint.broadcast_from(self(), @topic, "update:state", state)
+    {:noreply, assign(socket, :state, state)}
+  end
+
+  defp get_message(%{alice_socket: alice_socket, bob_socket: bob_socket}, id) do
+    case {id, alice_socket, bob_socket} do
+      {x, x, _} -> "You are playing as Alice"
+      {x, _, x} -> "You are playing as Bob"
+      {_, _, nil} -> "Waiting for Bob"
+      _ -> "You are #{id}, watching Alice (#{alice_socket}) vs Bob (#{bob_socket})"
     end
   end
 end

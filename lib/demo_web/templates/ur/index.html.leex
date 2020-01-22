@@ -19,12 +19,18 @@
 </style>
 <div>
   <h1>The Royal Game of Ur</h1>
-  <div>socket id: <%= @socket_id %></div>
-  <div>other_sockets: <%= Enum.join(@other_sockets, "") %></div>
+
+  <div><%= @player_message %></div>
+
+  <%=if !@bob_socket do %>
+    <div>
+      <%= for socket_id <- @other_sockets do %>
+        <button phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
+      <% end %>
+    </div>
+  <% end %>
+
   <div>
-    <%= if !@alice_socket do %>
-      <button phx-click="play-as-alice" phx-value="<%= @socket_id %>">Play as Alice</button>
-    <% end %>
     <%= if !@current_roll do %>
       <button phx-click="roll">Roll</button>
     <% end %>
