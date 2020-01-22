@@ -19,15 +19,18 @@
 </style>
 <div>
   <h1>The Royal Game of Ur</h1>
-  <%= if @val do %>
-  <span><%= @val %></span>
-  <% end %>
+  <div>Alice at <%= @player_a %></div>
   <div>
+  <%= if !@val do %>
   <button phx-click="roll">Roll</button>
+  <% end %>
+  <%= if @val do %>
+  <button phx-click="move">Move <%= @val %></button>
+  <% end %>
   </div>
   <div class="board">
-    <%= for cell <- @cells do %>
-      <div class="cell <%= cell %>" style="grid-area: <%= cell %>"><%= cell %></div>
+    <%= for %{name: name, occupied: occupied} <- @cells do %>
+      <div class="cell <%= name %>" style="grid-area: <%= name %>"><%= name %> <%= occupied %></div>
     <% end %>
   </div>
 </div>
