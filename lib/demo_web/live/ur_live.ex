@@ -3,8 +3,7 @@ defmodule DemoWeb.UrLive do
 
   alias DemoWeb.UrView
   alias DemoWeb.UrPresenter
-
-  @special_positions [4, 8, 14]
+  alias DemoWeb.UrGame
 
   @topic "ur"
   @initial_state %{
@@ -30,13 +29,13 @@ defmodule DemoWeb.UrLive do
 
   def handle_event("roll", _, socket) do
     socket.assigns.state
-    |> roll_update
+    |> UrGame.roll_update()
     |> broadcast_and_assign_state(socket)
   end
 
   def handle_event("move", %{"moveto" => move_to}, socket) do
     socket.assigns.state
-    |> move_update(String.to_integer(move_to))
+    |> UrGame.move_update(String.to_integer(move_to))
     |> broadcast_and_assign_state(socket)
   end
 
@@ -53,48 +52,6 @@ defmodule DemoWeb.UrLive do
   def handle_info(%{event: "event:join", payload: %{socket_id: socket_id}}, socket) do
     other_sockets = (socket.assigns.other_sockets ++ [socket_id]) |> Enum.uniq()
     {:noreply, assign(socket, :other_sockets, other_sockets)}
-  end
-
-  def special_position?(index) do
-    @special_positions |> Enum.member?(index)
-  end
-
-  defp roll() do
-    Enum.sum([Enum.random(0..1), Enum.random(0..1), Enum.random(0..1), Enum.random(0..1)])
-  end
-
-  defp roll_update(state) do
-    new_roll = roll()
-
-    new_current_player =
-      case {new_roll, state.current_player} do
-        {0, :alice} -> :bob
-        {0, :bob} -> :alice
-        _ -> state.current_player
-      end
-
-    state
-    |> Map.merge(%{current_roll: roll(), current_player: new_current_player})
-  end
-
-  defp move_update(state, move_to) do
-    player = Map.get(state, state.current_player)
-
-    moved_index =
-      player |> Enum.find_index(fn position -> position == move_to - state.current_roll end)
-
-    new_player = List.replace_at(player, moved_index, move_to)
-
-    new_current_player =
-      case {special_position?(move_to), state.current_player} do
-        {true, _} -> state.current_player
-        {_, :alice} -> :bob
-        _ -> :alice
-      end
-
-    state
-    |> Map.put(state.current_player, new_player)
-    |> Map.merge(%{current_roll: nil, current_player: new_current_player})
   end
 
   defp broadcast_and_assign_state(state, socket) do

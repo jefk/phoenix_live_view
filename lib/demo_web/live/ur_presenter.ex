@@ -1,4 +1,5 @@
 defmodule DemoWeb.UrPresenter do
+  alias DemoWeb.UrGame
   # This is probably what a view is for??
 
   def present(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
@@ -20,7 +21,7 @@ defmodule DemoWeb.UrPresenter do
   end
 
   defp get_cells(state) do
-    possible_moves = get_possible_moves(state)
+    possible_moves = UrGame.possible_moves(state)
 
     shared_cells =
       Enum.map(5..12, fn index ->
@@ -31,7 +32,7 @@ defmodule DemoWeb.UrPresenter do
         class_names =
           []
           |> Enum.concat(if possible?, do: ["possible"], else: [])
-          |> Enum.concat(if DemoWeb.UrLive.special_position?(index), do: ["special"], else: [])
+          |> Enum.concat(if UrGame.special_position?(index), do: ["special"], else: [])
           |> Enum.join(" ")
 
         phx_click = if possible?, do: "move", else: ""
@@ -51,7 +52,7 @@ defmodule DemoWeb.UrPresenter do
   end
 
   defp get_cells(state, player) do
-    possible_moves = get_possible_moves(state)
+    possible_moves = UrGame.possible_moves(state)
     prefix = player |> Atom.to_string() |> String.first()
 
     Enum.concat(1..4, 13..14)
@@ -62,7 +63,7 @@ defmodule DemoWeb.UrPresenter do
       class_names =
         []
         |> Enum.concat(if possible?, do: ["possible"], else: [])
-        |> Enum.concat(if DemoWeb.UrLive.special_position?(index), do: ["special"], else: [])
+        |> Enum.concat(if UrGame.special_position?(index), do: ["special"], else: [])
         |> Enum.join(" ")
 
       phx_click = if possible?, do: "move", else: ""
@@ -96,19 +97,6 @@ defmodule DemoWeb.UrPresenter do
       {x, _, x} -> :bob
       _ -> nil
     end
-  end
-
-  defp get_possible_moves(state) do
-    current_positions =
-      case state.current_roll do
-        nil -> []
-        _ -> Map.get(state, state.current_player)
-      end
-
-    current_positions
-    |> Enum.map(fn index -> index + state.current_roll end)
-    |> Enum.filter(fn index -> !Enum.member?(current_positions, index) end)
-    |> Enum.uniq()
   end
 
   defp maybe_no_op_clicks(cells, my_turn?) do
