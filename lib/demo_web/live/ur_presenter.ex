@@ -13,6 +13,9 @@ defmodule DemoWeb.UrPresenter do
     state
     |> Map.merge(%{
       cells: cells,
+      holding_cells: get_holding_cells(state),
+      alice_at_start: 5,
+      alice_at_home: 2,
       socket_id: id,
       other_sockets: other_sockets,
       player_message: get_message(state, id),
@@ -112,5 +115,14 @@ defmodule DemoWeb.UrPresenter do
       cells
       |> Enum.map(fn cell -> Map.put(cell, :phx_click, "") end)
     end
+  end
+
+  defp get_holding_cells(state) do
+    [
+      %{name: "a0", emoji: "🤷‍♀️", label: "start", count: Enum.count(state.alice, fn position -> position == 0 end)},
+      %{name: "a15", emoji: "🏡", label: "home", count: Enum.count(state.alice, fn position -> position == 15 end)},
+      %{name: "b0", emoji: "🤷‍♂️", label: "start", count: Enum.count(state.bob, fn position -> position == 0 end)},
+      %{name: "b15", emoji: "🏡", label: "home", count: Enum.count(state.bob, fn position -> position == 15 end)}
+    ]
   end
 end

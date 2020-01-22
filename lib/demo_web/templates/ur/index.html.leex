@@ -2,6 +2,7 @@
 .board {
   display: grid;
   grid-gap: 1rem;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-areas: "a4  s5  b4"
                        "a3  s6  b3"
                        "a2  s7  b2"
@@ -18,6 +19,20 @@
   position: relative;
 }
 
+.cell .emoj {
+  margin-left: -2rem;
+  font-size: 3rem;
+  line-height: 0;
+}
+
+.cell.holding {
+  border: 0px;
+}
+
+.cell.holding .label {
+  margin-right: 2.5rem;
+}
+
 .cell .token {
   position: absolute;
   font-size: 6rem;
@@ -27,7 +42,10 @@
 }
 
 .cell .label {
-
+  color: #555555;
+  font-weight: bold;
+  font-size: 1rem;
+  text-transform: uppercase;
 }
 
 .special {
@@ -82,6 +100,16 @@
   <% end %>
 
   <div class="board">
+    <%= for c <- @holding_cells do %>
+      <div class="cell holding" style="grid-area: <%= c.name %>">
+        <span class="label"><%= c.label %></span>
+        <%= if c.count > 0 do %>
+          <%= for i <- 1..c.count do %>
+            <span class="emoj"><%= c.emoji %></span>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
     <%= for c <- @cells do %>
       <div
         class="cell <%= c.name %> <%= c.class_names %>"
@@ -94,7 +122,4 @@
       </div>
     <% end %>
   </div>
-
-  <div><%= Enum.join(@alice, " | ") %></div>
-  <div><%= Enum.join(@bob, " | ") %></div>
 </div>
