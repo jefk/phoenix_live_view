@@ -2,6 +2,7 @@ defmodule DemoWeb.UrLive do
   use Phoenix.LiveView
 
   @topic "ur"
+  @roll_event "event:roll"
 
   def render(assigns) do
     ~L"""
@@ -24,11 +25,11 @@ defmodule DemoWeb.UrLive do
 
   def handle_event("roll", _, socket) do
     new_roll = roll()
-    DemoWeb.Endpoint.broadcast_from(self(), @topic, "roll", %{val: new_roll})
+    DemoWeb.Endpoint.broadcast_from(self(), @topic, @roll_event, %{val: new_roll})
     {:noreply, assign(socket, val: new_roll)}
   end
 
-  def handle_info(%{event: "roll", payload: state}, socket) do
+  def handle_info(%{event: @roll_event, payload: state}, socket) do
     {:noreply, assign(socket, state)}
   end
 
