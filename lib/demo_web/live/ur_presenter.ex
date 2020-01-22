@@ -19,7 +19,8 @@ defmodule DemoWeb.UrPresenter do
       socket_id: id,
       other_sockets: other_sockets,
       player_message: get_message(state, id),
-      my_turn: my_turn?
+      my_turn: my_turn?,
+      can_roll: my_turn? && !state.winner && state.bob_socket,
     })
   end
 
@@ -103,13 +104,23 @@ defmodule DemoWeb.UrPresenter do
     end)
   end
 
-  defp get_message(%{alice_socket: alice_socket, bob_socket: bob_socket}, id) do
-    case {id, alice_socket, bob_socket} do
+  defp get_message(%{alice_socket: alice_socket, bob_socket: bob_socket} = state, id) do
+    winner = case {state.winner, me(state, id)} do
+      {nil, _} -> nil
+      {x, x} -> "👑 You won 👑"
+      {:alice, _} -> "Alice is the winner 😭"
+      {:bob, _} -> "Bob is the winner 😭"
+      _ -> nil
+    end
+
+    player = case {id, alice_socket, bob_socket} do
       {x, x, _} -> "You are playing as Alice"
       {x, _, x} -> "You are playing as Bob"
       {_, _, nil} -> "Waiting for Bob to join"
       _ -> "You are watching"
     end
+
+    winner || player
   end
 
   defp get_my_turn(state, id) do

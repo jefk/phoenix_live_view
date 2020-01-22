@@ -1,6 +1,7 @@
 defmodule DemoWeb.UrGame do
   @special_positions [4, 8, 14]
   @battle_ground 5..12
+  @home_position 15
 
   @initial_state %{
     current_roll: nil,
@@ -8,7 +9,8 @@ defmodule DemoWeb.UrGame do
     bob_socket: nil,
     current_player: :alice,
     alice: Enum.map(1..7, fn _ -> 0 end),
-    bob: Enum.map(1..7, fn _ -> 0 end)
+    bob: Enum.map(1..7, fn _ -> 0 end),
+    winner: nil
   }
 
   def initial_state do
@@ -28,7 +30,10 @@ defmodule DemoWeb.UrGame do
 
     current_positions
     |> Enum.map(fn index -> index + state.current_roll end)
-    |> Enum.reject(fn index -> index < 15 && Enum.member?(current_positions, index) end)
+    |> Enum.reject(fn index -> index > @home_position end)
+    |> Enum.reject(fn index ->
+      index in 1..(@home_position - 1) && Enum.member?(current_positions, index)
+    end)
     |> Enum.reject(fn index -> blocked_by_opponent(state, index) end)
     |> Enum.uniq()
   end
@@ -58,6 +63,7 @@ defmodule DemoWeb.UrGame do
       state
       |> Map.put(state.current_player, new_player_positions)
       |> maybe_bump_opponent
+      |> maybe_declare_victory
       |> Map.put(:current_roll, nil)
 
     if special_position?(move_to), do: state, else: switch_player(state)
@@ -83,6 +89,17 @@ defmodule DemoWeb.UrGame do
     case state.current_player do
       :alice -> :bob
       _ -> :alice
+    end
+  end
+
+  defp maybe_declare_victory(state) do
+    positions = Map.get(state, state.current_player)
+
+    if Enum.all?(positions, fn position -> position == @home_position end) do
+      state
+      |> Map.put(:winner, state.current_player)
+    else
+      state
     end
   end
 

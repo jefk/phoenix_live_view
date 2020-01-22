@@ -102,18 +102,21 @@
     <div class="messages">
       <h1 class="title">The Royal Game of Ur</h1>
       <div><%= @player_message %></div>
-      <%=if @bob_socket do %>
+      <%=if @bob_socket && !@winner do %>
         <%= if @my_turn do %>
           <div>It's your turn</div>
         <% else %>
           <div>Waiting for <%= @current_player %> to move</div>
         <% end %>
       <% end %>
+      <%=if @winner do %>
+        <div>Refresh to play again</div>
+      <% end %>
     </div>
 
     <div style="flex-shrink: 0; margin-left: auto">
       <%= if !@current_roll do %>
-        <%= content_tag(:button, "🎲 Roll", class: "btn roll-btn", disabled: !@my_turn || !@bob_socket, "phx-click": "roll") %>
+        <%= content_tag(:button, "🎲 Roll", class: "btn roll-btn", disabled: !@can_roll, "phx-click": "roll") %>
       <% else %>
         <button class="btn roll-btn" disabled>🎲 <%= @current_roll %></button>
       <% end %>
