@@ -2,6 +2,19 @@ defmodule DemoWeb.UrGame do
   @special_positions [4, 8, 14]
   @battle_ground 5..12
 
+  @initial_state %{
+    current_roll: nil,
+    alice_socket: nil,
+    bob_socket: nil,
+    current_player: :alice,
+    alice: Enum.map(1..7, fn _ -> 0 end),
+    bob: Enum.map(1..7, fn _ -> 0 end)
+  }
+
+  def initial_state do
+    @initial_state
+  end
+
   def special_position?(index) do
     @special_positions |> Enum.member?(index)
   end

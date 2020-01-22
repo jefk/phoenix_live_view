@@ -1,4 +1,9 @@
 <style type="text/css">
+.ur-container {
+  display: grid;
+  grid-gap: 1rem;
+}
+
 .board {
   display: grid;
   grid-gap: 1rem;
@@ -13,27 +18,36 @@
                        "a13 s12 b13";
 }
 
-.cell {
-  border: 2px solid tomato;
-  padding: 1rem;
-  position: relative;
+.title {
+  font-size: 4vw;
+  line-height: 4vw;
+  margin: 0;
 }
 
-.cell .emoj {
-  margin-left: -2rem;
-  font-size: 3rem;
-  line-height: 0;
+.messages {
+  display: flex;
+  font-size: 1rem;
+}
+
+.cell {
+  border: 2px solid tomato;
+  padding: 0.9rem;
+  position: relative;
+  outline: none;
+  display: flex;
+  justify-content: space-between;
 }
 
 .cell.holding {
   border: 2px solid white;
+  padding: 0.25rem;
 }
 
-.cell.holding .label {
-  margin-right: 2.5rem;
+.cell.holding .token {
+  font-size: 2.5rem;
 }
 
-.cell .token {
+.center {
   position: absolute;
   font-size: 6rem;
   left: 50%;
@@ -41,10 +55,14 @@
   transform: translate3d(-50%, -50%, 1px);
 }
 
+.cell .token {
+  font-size: 3.5rem;
+}
+
 .cell .label {
   color: #555555;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
 }
 
@@ -72,54 +90,57 @@
   }
 }
 </style>
-<div>
-  <h1>The Royal Game of Ur</h1>
+<div class="ur-container">
+  <h1 class="title">The Royal Game of Ur</h1>
 
-  <div><%= @player_message %></div>
-
-  <%=if @bob_socket do %>
-
-    <%= if @my_turn do %>
-      <div>It's your turn</div>
-    <% else %>
-      <div>Waiting for <%= @current_player %> to move</div>
-    <% end %>
-
-    <div>
-      <%= if !@current_roll do %>
-        <%= content_tag(:button, "Roll", disabled: !@my_turn, "phx-click": "roll") %>
+  <div class="messages">
+    <div><%= @player_message %></div>
+    <%=if @bob_socket do %>
+      <%= if @my_turn do %>
+        <div>It's your turn</div>
       <% else %>
-        <button disabled>A <%= @current_roll %> was rolled</button>
+        <div>Waiting for <%= @current_player %> to move</div>
       <% end %>
-    </div>
+    <% end %>
+  </div>
 
-  <% else %>
+  <div class="actions">
+    <%=if @bob_socket do %>
 
-    <div>
-      <%= for socket_id <- @other_sockets do %>
-        <button phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
-      <% end %>
-    </div>
+      <div>
+        <%= if !@current_roll do %>
+          <%= content_tag(:button, "Roll", class: "btn", disabled: !@my_turn, "phx-click": "roll") %>
+        <% else %>
+          <button class="btn" disabled>A <%= @current_roll %> was rolled</button>
+        <% end %>
+      </div>
 
-  <% end %>
+    <% else %>
+
+      <div>
+        <%= for socket_id <- @other_sockets do %>
+          <button class="btn" phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
+        <% end %>
+      </div>
+
+    <% end %>
+  </div>
 
   <div class="board">
     <%= for c <- @cells do %>
-      <div
-        class="cell <%= c.name %> <%= c.class_names %>"
+      <button
+        class="button-clear cell <%= c.name %> <%= c.class_names %>"
         style="grid-area: <%= c.name %>"
         phx-click="<%= c.phx_click %>"
         phx-value-moveto="<%= c.index %>"
       >
         <span class="label"><%= c.label %></span>
         <%= if c.holding do %>
-          <%= for i <- 1..c.count do %>
-            <span class="emoj"><%= c.occupied %></span>
-          <% end %>
-        <% else %>
-          <span class="token"><%= c.occupied %><span>
+          <span class="label">× <%= c.count %></span>
         <% end %>
-      </div>
+        <span class="token center"><%= c.occupied %><span>
+
+      </button>
     <% end %>
   </div>
 </div>

@@ -2,6 +2,9 @@ defmodule DemoWeb.UrPresenter do
   alias DemoWeb.UrGame
   # This is probably what a view is for??
 
+  @alice_avatar "👸"
+  @bob_avatar "🤴"
+
   def present(%{state: state, other_sockets: other_sockets, socket: %{id: id}}) do
     my_turn? = get_my_turn(state, id)
 
@@ -13,8 +16,6 @@ defmodule DemoWeb.UrPresenter do
     state
     |> Map.merge(%{
       cells: cells,
-      alice_at_start: 5,
-      alice_at_home: 2,
       socket_id: id,
       other_sockets: other_sockets,
       player_message: get_message(state, id),
@@ -27,8 +28,8 @@ defmodule DemoWeb.UrPresenter do
 
     shared_cells =
       Enum.map(5..12, fn index ->
-        alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: "🤷‍♀️", else: nil
-        bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: "🤷‍♂️", else: nil
+        alice_in = if Map.get(state, :alice) |> Enum.member?(index), do: @alice_avatar, else: nil
+        bob_in = if Map.get(state, :bob) |> Enum.member?(index), do: @bob_avatar, else: nil
         possible? = Enum.member?(possible_moves, index)
 
         class_names =
@@ -64,8 +65,8 @@ defmodule DemoWeb.UrPresenter do
 
     emoji =
       case player do
-        :alice -> "🤷‍♀️"
-        _ -> "🤷‍♂️"
+        :alice -> @alice_avatar
+        _ -> @bob_avatar
       end
 
     Enum.concat(0..4, 13..15)

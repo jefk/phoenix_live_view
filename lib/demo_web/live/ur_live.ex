@@ -6,14 +6,6 @@ defmodule DemoWeb.UrLive do
   alias DemoWeb.UrGame
 
   @topic "ur"
-  @initial_state %{
-    current_roll: nil,
-    alice_socket: nil,
-    bob_socket: nil,
-    current_player: :alice,
-    alice: Enum.map(1..7, fn _ -> 0 end),
-    bob: Enum.map(1..7, fn _ -> 0 end)
-  }
 
   def render(assigns) do
     UrView.render("index.html", UrPresenter.present(assigns))
@@ -24,7 +16,7 @@ defmodule DemoWeb.UrLive do
 
     DemoWeb.Endpoint.subscribe(@topic)
 
-    {:ok, assign(socket, %{state: @initial_state, other_sockets: []})}
+    {:ok, assign(socket, %{state: UrGame.initial_state(), other_sockets: []})}
   end
 
   def handle_event("roll", _, socket) do
