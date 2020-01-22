@@ -64,8 +64,17 @@ defmodule DemoWeb.UrLive do
   end
 
   defp roll_update(state) do
+    new_roll = roll()
+
+    new_current_player =
+      case {new_roll, state.current_player} do
+        {0, :alice} -> :bob
+        {0, :bob} -> :alice
+        _ -> state.current_player
+      end
+
     state
-    |> Map.merge(%{current_roll: roll()})
+    |> Map.merge(%{current_roll: roll(), current_player: new_current_player})
   end
 
   defp move_update(state, move_to) do
@@ -77,8 +86,9 @@ defmodule DemoWeb.UrLive do
     new_player = List.replace_at(player, moved_index, move_to)
 
     new_current_player =
-      case state.current_player do
-        :alice -> :bob
+      case {special_position?(move_to), state.current_player} do
+        {true, _} -> state.current_player
+        {_, :alice} -> :bob
         _ -> :alice
       end
 
