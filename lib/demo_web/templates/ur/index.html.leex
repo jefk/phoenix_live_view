@@ -1,3 +1,22 @@
+<style type="text/css">
+.board {
+  display: grid;
+  grid-gap: 0.5rem;
+  grid-template-areas: "a4  s5  b4"
+                       "a3  s6  b3"
+                       "a2  s7  b2"
+                       "a1  s8  b1"
+                       ".   s9  ."
+                       ".   s10 ."
+                       "a14 s11 b14"
+                       "a13 s12 b13";
+}
+
+.cell {
+  background: tomato;
+  padding: 1rem;
+}
+</style>
 <div>
   <h1>The Royal Game of Ur</h1>
   <%= if @val do %>
@@ -5,5 +24,10 @@
   <% end %>
   <div>
   <button phx-click="roll">Roll</button>
+  </div>
+  <div class="board">
+    <%= for cell <- @cells do %>
+      <div class="cell <%= cell %>" style="grid-area: <%= cell %>"><%= cell %></div>
+    <% end %>
   </div>
 </div>

@@ -6,11 +6,13 @@ defmodule DemoWeb.UrLive do
   @topic "ur"
   @roll_event "event:roll"
 
+  @cells ~w|a4 a3 a2 a1 a14 a13 s5 s6 s7 s8 s9 s10 s11 s12 b4 b3 b2 b1 b14 b13|
+
   def render(assigns), do: UrView.render("index.html", assigns)
 
   def mount(_session, socket) do
     DemoWeb.Endpoint.subscribe(@topic)
-    {:ok, assign(socket, val: nil)}
+    {:ok, assign(socket, val: nil, cells: @cells)}
   end
 
   def handle_event("roll", _, socket) do
