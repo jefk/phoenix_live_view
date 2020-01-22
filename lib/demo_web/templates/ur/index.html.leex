@@ -22,7 +22,9 @@
 
   <div><%= @player_message %></div>
 
-  <%=if !@bob_socket do %>
+  <%=if @bob_socket do %>
+    <div>It's <%= Atom.to_string(@current_player) %>'s turn.</div>
+  <% else %>
     <div>
       <%= for socket_id <- @other_sockets do %>
         <button phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>

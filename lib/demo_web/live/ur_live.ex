@@ -9,6 +9,7 @@ defmodule DemoWeb.UrLive do
     current_roll: nil,
     alice_socket: nil,
     bob_socket: nil,
+    current_player: :alice,
     alice: 0,
     bob: 0
   }
@@ -44,7 +45,6 @@ defmodule DemoWeb.UrLive do
   end
 
   def handle_info(%{event: "update:state", payload: state}, socket) do
-    IO.puts("handling update:state")
     {:noreply, assign(socket, :state, state)}
   end
 
@@ -62,10 +62,18 @@ defmodule DemoWeb.UrLive do
     |> Map.merge(%{current_roll: roll()})
   end
 
-  defp move_update(state) do
-    alice = state.alice + state.current_roll
+  defp move_update(%{current_player: player} = state) do
+    new_position = Map.get(state, player) + state.current_roll
 
-    state |> Map.merge(%{alice: alice, current_roll: nil})
+    new_player =
+      case player do
+        :alice -> :bob
+        _ -> :alice
+      end
+
+    state
+    |> Map.put(player, new_position)
+    |> Map.merge(%{current_roll: nil, current_player: new_player})
   end
 
   defp broadcast_and_assign_state(state, socket) do
