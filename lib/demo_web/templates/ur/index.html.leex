@@ -26,7 +26,7 @@
 }
 
 .cell.holding {
-  border: 0px;
+  border: 2px solid white;
 }
 
 .cell.holding .label {
@@ -56,15 +56,19 @@
   animation: pulse 2s infinite;
 }
 
+.possible:hover {
+  border: 2px solid rgb(108,255,71);
+}
+
 @keyframes pulse {
   0% {
-    background-color: rgba(255,99,71, 0.2);
+    background-color: rgba(108,255,71, 0.2);
   }
   50% {
-    background-color: rgba(255,99,71, 0.3);
+    background-color: rgba(108,255,71, 0.5);
   }
   100% {
-    background-color: rgba(255,99,71, 0.2);
+    background-color: rgba(108,255,71, 0.2);
   }
 }
 </style>
@@ -100,16 +104,6 @@
   <% end %>
 
   <div class="board">
-    <%= for c <- @holding_cells do %>
-      <div class="cell holding" style="grid-area: <%= c.name %>">
-        <span class="label"><%= c.label %></span>
-        <%= if c.count > 0 do %>
-          <%= for i <- 1..c.count do %>
-            <span class="emoj"><%= c.emoji %></span>
-          <% end %>
-        <% end %>
-      </div>
-    <% end %>
     <%= for c <- @cells do %>
       <div
         class="cell <%= c.name %> <%= c.class_names %>"
@@ -117,8 +111,14 @@
         phx-click="<%= c.phx_click %>"
         phx-value-moveto="<%= c.index %>"
       >
-        <span class="label"><%= c.name %></span>
-        <span class="token"><%= c.occupied %><span>
+        <span class="label"><%= c.label %></span>
+        <%= if c.holding do %>
+          <%= for i <- 1..c.count do %>
+            <span class="emoj"><%= c.occupied %></span>
+          <% end %>
+        <% else %>
+          <span class="token"><%= c.occupied %><span>
+        <% end %>
       </div>
     <% end %>
   </div>

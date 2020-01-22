@@ -13,7 +13,6 @@ defmodule DemoWeb.UrPresenter do
     state
     |> Map.merge(%{
       cells: cells,
-      holding_cells: get_holding_cells(state),
       alice_at_start: 5,
       alice_at_home: 2,
       socket_id: id,
@@ -33,19 +32,24 @@ defmodule DemoWeb.UrPresenter do
         possible? = Enum.member?(possible_moves, index)
 
         class_names =
-          []
-          |> Enum.concat(if possible?, do: ["possible"], else: [])
-          |> Enum.concat(if UrGame.special_position?(index), do: ["special"], else: [])
+          [
+            if(possible?, do: "possible", else: nil),
+            if(UrGame.special_position?(index), do: "special", else: nil),
+            if(index == 0 || index == 15, do: "holding", else: nil)
+          ]
+          |> Enum.reject(&is_nil/1)
           |> Enum.join(" ")
 
         phx_click = if possible?, do: "move", else: ""
 
         %{
           name: "s#{index}",
+          label: "s#{index}",
           occupied: alice_in || bob_in,
           class_names: class_names,
           phx_click: phx_click,
-          index: index
+          index: index,
+          holding: false
         }
       end)
 
@@ -64,25 +68,36 @@ defmodule DemoWeb.UrPresenter do
         _ -> "🤷‍♂️"
       end
 
-    Enum.concat(1..4, 13..14)
+    Enum.concat(0..4, 13..15)
     |> Enum.map(fn index ->
       player_in_cell = if Map.get(state, player) |> Enum.member?(index), do: emoji, else: nil
       possible? = Enum.member?(possible_moves, index) && state.current_player == player
 
       class_names =
-        []
-        |> Enum.concat(if possible?, do: ["possible"], else: [])
-        |> Enum.concat(if UrGame.special_position?(index), do: ["special"], else: [])
+        [
+          if(possible?, do: "possible", else: nil),
+          if(UrGame.special_position?(index), do: "special", else: nil),
+          if(index == 0 || index == 15, do: "holding", else: nil)
+        ]
+        |> Enum.reject(&is_nil/1)
         |> Enum.join(" ")
 
       phx_click = if possible?, do: "move", else: ""
 
       %{
         name: "#{prefix}#{index}",
+        label:
+          case index do
+            0 -> "start"
+            15 -> "home"
+            _ -> "#{prefix}#{index}"
+          end,
         occupied: player_in_cell,
         class_names: class_names,
         phx_click: phx_click,
-        index: index
+        count: count_at(Map.get(state, player), index),
+        index: index,
+        holding: index == 0 || index == 15
       }
     end)
   end
@@ -117,12 +132,7 @@ defmodule DemoWeb.UrPresenter do
     end
   end
 
-  defp get_holding_cells(state) do
-    [
-      %{name: "a0", emoji: "🤷‍♀️", label: "start", count: Enum.count(state.alice, fn position -> position == 0 end)},
-      %{name: "a15", emoji: "🏡", label: "home", count: Enum.count(state.alice, fn position -> position == 15 end)},
-      %{name: "b0", emoji: "🤷‍♂️", label: "start", count: Enum.count(state.bob, fn position -> position == 0 end)},
-      %{name: "b15", emoji: "🏡", label: "home", count: Enum.count(state.bob, fn position -> position == 15 end)}
-    ]
+  defp count_at(positions, at) do
+    Enum.count(positions, fn position -> position == at end)
   end
 end
