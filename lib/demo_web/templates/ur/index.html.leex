@@ -19,14 +19,17 @@
 }
 
 .title {
-  font-size: 4vw;
-  line-height: 4vw;
+  font-size: max(3vw, 1rem);
+  line-height: 1.2em;
   margin: 0;
 }
 
 .messages {
-  display: flex;
   font-size: 1rem;
+}
+
+.menu {
+  display: flex;
 }
 
 .cell {
@@ -91,40 +94,35 @@
 }
 </style>
 <div class="ur-container">
-  <h1 class="title">The Royal Game of Ur</h1>
-
-  <div class="messages">
-    <div><%= @player_message %></div>
-    <%=if @bob_socket do %>
-      <%= if @my_turn do %>
-        <div>It's your turn</div>
-      <% else %>
-        <div>Waiting for <%= @current_player %> to move</div>
-      <% end %>
-    <% end %>
-  </div>
-
-  <div class="actions">
-    <%=if @bob_socket do %>
-
-      <div>
-        <%= if !@current_roll do %>
-          <%= content_tag(:button, "Roll", class: "btn", disabled: !@my_turn, "phx-click": "roll") %>
+  <div class="menu">
+    <div class="messages">
+      <h1 class="title">The Royal Game of Ur</h1>
+      <div><%= @player_message %></div>
+      <%=if @bob_socket do %>
+        <%= if @my_turn do %>
+          <div>It's your turn</div>
         <% else %>
-          <button class="btn" disabled>A <%= @current_roll %> was rolled</button>
+          <div>Waiting for <%= @current_player %> to move</div>
         <% end %>
-      </div>
+      <% end %>
+    </div>
 
-    <% else %>
-
-      <div>
-        <%= for socket_id <- @other_sockets do %>
-          <button class="btn" phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
-        <% end %>
-      </div>
-
-    <% end %>
+    <div style="flex-shrink: 0; margin-left: auto">
+      <%= if !@current_roll do %>
+        <%= content_tag(:button, "Roll", class: "btn", disabled: !@my_turn || !@bob_socket, "phx-click": "roll") %>
+      <% else %>
+        <button class="btn" disabled>A <%= @current_roll %> was rolled</button>
+      <% end %>
+    </div>
   </div>
+
+  <%=if !@bob_socket do %>
+    <div>
+      <%= for socket_id <- @other_sockets do %>
+        <button class="btn" phx-click="select-bob" phx-value-bob="<%= socket_id %>">Bob is <%= socket_id %></button>
+      <% end %>
+    </div>
+  <% end %>
 
   <div class="board">
     <%= for c <- @cells do %>

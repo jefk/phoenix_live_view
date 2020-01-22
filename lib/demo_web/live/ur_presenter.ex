@@ -108,7 +108,7 @@ defmodule DemoWeb.UrPresenter do
       {x, x, _} -> "You are playing as Alice"
       {x, _, x} -> "You are playing as Bob"
       {_, _, nil} -> "Waiting for Bob to join"
-      _ -> "You are #{id}, watching Alice (#{alice_socket}) vs Bob (#{bob_socket})"
+      _ -> "You are watching"
     end
   end
 
