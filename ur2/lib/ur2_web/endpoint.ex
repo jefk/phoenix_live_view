@@ -11,7 +11,7 @@ defmodule Ur2Web.Endpoint do
   ]
 
   socket "/socket", Ur2Web.UserSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
